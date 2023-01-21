@@ -1,0 +1,183 @@
+#include <stdio.h>
+#include <string.h>
+#define K 4
+#define L 4
+#define M 4
+#define MAX 101
+
+
+
+struct array{
+    int value;
+    int row;
+    int column;
+};
+
+void print(struct array sort[MAX]){
+    int i;
+    
+    printf("Sparse Matrix Multiplication:\nRow\tColumn\tValue\n");
+    printf("%d\t %d\t %d\n",sort[0].row,sort[0].column,sort[0].value);
+    
+    for(i=1;i<=sort[0].value;i++){
+        printf("%d\t %d\t %d\n",sort[i].row+1,sort[i].column+1,sort[i].value);
+    }
+}
+
+struct array * convert(int array1[K][L],struct array one_dimensional1[MAX]){
+//https://www.tutorialspoint.com/cprogramming/c_return_arrays_from_function.htm
+    
+    int i,j;
+    int count1=1;
+    
+    one_dimensional1[0].row=K;
+    one_dimensional1[0].column=L;
+    
+    for(i=0;i<K;i++){
+        for(j=0;j<L;j++){
+            if(array1[i][j]!=0){
+                one_dimensional1[count1].row=i;
+                one_dimensional1[count1].column=j;
+                one_dimensional1[count1].value=array1[i][j];
+                count1++;
+            }
+        }
+    }
+    one_dimensional1[0].value=count1-1;
+    
+    return one_dimensional1;
+}
+
+void multiplied(struct array one_dimensional1[MAX],struct array one_dimensional_transpose[MAX]){
+    
+    struct array sort[MAX];
+    struct array result[MAX];
+    struct array temp[MAX];
+    
+    int i,j;
+    int count=1;
+    int count1=1;
+    
+    for(i=1;i<=one_dimensional1[0].value;i++){
+        for(j=1;j<=one_dimensional_transpose[0].value;j++){
+            if(one_dimensional1[i].column==one_dimensional_transpose[j].column){//Searching for values with the same columns in the both array
+                result[count].row=one_dimensional_transpose[j].row;//row of the first array is assigned as result array row.														
+                result[count].column=one_dimensional1[i].row;//row of second array is assigned as result array cloumn
+                result[count].value=(one_dimensional1[i].value)*(one_dimensional_transpose[j].value);//multiplied all values which has a same column
+                count++;
+            }
+        }
+    }
+    result[0].value=count-1;
+    
+    for(i=1;i<=count;i++){
+        if(result[i].value!=0){//check the values which has not zero 
+            for(j=i+1;j<=count;j++){
+            	
+                if(result[i].row==result[j].row && result[i].column==result[j].column){//checks for values that have the same row and column of both
+                    result[i].value=(result[i].value)+(result[j].value);//adds these values one of the index that same row and cloumn
+                    result[j].value=0;//assign 0 the other index so it doesn't loop again
+                    
+                }
+            }
+        }
+    }
+    
+    for(j=1;j<count;j++){//because of keep the order right this loop removes the zero values from the array and transfers them to a new array
+        if(result[j].value!=0){//check de zero values
+            sort[count1].row=result[j].row;
+            sort[count1].column=result[j].column;
+            sort[count1].value=result[j].value;
+            count1++;
+        }
+    }
+   
+   sort[0].row=K;
+   sort[0].column=M;
+   sort[0].value=count1-1;
+   
+   //now struct sort shows multiplied form without sorting 
+    
+   
+   for(i=1;i<=sort[0].value;i++){//sort algorithm
+       for(j=i+1;j<=sort[0].value;j++){
+           if(sort[i].row==sort[j].row){
+               if(sort[i].column>sort[j].column){
+                   
+                   temp[i]=sort[i];
+                   sort[i]=sort[j];
+                   sort[j]=temp[i];
+                   
+               }
+           }
+           else if(sort[i].row>sort[j].row){
+               
+                   temp[i]=sort[i];
+                   sort[i]=sort[j];
+                   sort[j]=temp[i];
+                   
+           }
+           else{
+               if(sort[i].column>sort[j].column){
+                   temp[i]=sort[i];
+                   sort[i]=sort[j];
+                   sort[j]=temp[i];
+               }
+           }
+       }
+   }
+   
+   print(sort);
+}
+
+void transposee(struct array array2[MAX],struct array one_dimensional1[MAX]){
+	//print array's transpose form
+	//ceng205-slide 4:matrix transpose
+    struct array transpose[MAX];
+    
+    int i,j,n;
+    int count=1;
+    n=array2[0].value;
+    
+    transpose[0].row=array2[0].column;
+    transpose[0].column=array2[0].row;
+    transpose[0].value=n;
+    
+    if(n>0){
+       
+        for(i=0;i<array2[0].column;i++){
+            for(j=1;j<=n;j++){
+                if(array2[j].column==i){
+                transpose[count].row=array2[j].column;
+                transpose[count].column=array2[j].row;
+                transpose[count].value=array2[j].value;
+                count++;
+                }
+            }
+        }
+    }
+    
+    print(transpose);
+    multiplied(transpose,one_dimensional1);
+}
+
+
+
+int main(){
+	
+    int array1[K][L]= {{0,10,0,5},{0,2,4,0},{0,0,0,0},{3,0,0,7}};
+    int array2[L][M]={{1,0,0,2},{0,0,3,0},{0,8,0,0},{5,0,10,0}}; 
+    
+    struct array one_dimensional1[MAX]; 
+    struct array one_dimensional_transpose[MAX];
+    
+    memcpy(one_dimensional1,convert(array1,one_dimensional1),sizeof(one_dimensional1));//array1 has converted to one dimensional array
+    memcpy(one_dimensional_transpose,convert(array2,one_dimensional_transpose),sizeof(one_dimensional_transpose));//array2 has converted to one dimensional array
+    //https://stackoverflow.com/questions/13903388/how-to-assign-values-of-array-to-another-arraymaking-copy-in-c
+    
+    print(one_dimensional1);//print first matrix's one dimensional form
+    
+    transposee(one_dimensional_transpose,one_dimensional1);
+	/* this function print second matrix's one dimensional transpose form also runs to multiplied function*/
+		
+}
