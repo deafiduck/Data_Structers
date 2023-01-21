@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+//A binary tree node has data, pointer to left and right child 
+struct treeNode
+{
+int data;
+struct treeNode* leftptr;
+struct treeNode* rightptr;
+};
+//Function prototypes
+
+int height(struct treeNode* node);
+void reverseLevelOrder(struct treeNode* root);
+void printt(struct treeNode* root,int max_height);
+struct treeNode* newNode(int data);
+
+//Function to print reverse level order traversal a binary tree
+
+//Insert new node to the binary tree
+struct treeNode* newNode(int data)
+{
+struct treeNode* treeNode = (struct treeNode*) malloc(sizeof(struct treeNode));
+treeNode->data = data;
+treeNode->leftptr = NULL;
+treeNode->rightptr = NULL;
+return(treeNode);
+}
+
+
+void reverseLevelOrder(struct treeNode* root){
+	int max_height=height(root);
+	
+	int i;
+	for(i=max_height;i>=0;i--){//traverses each level from the end
+		
+		printt(root,i);
+		// start the loop in reverse because I want it to print from the end
+		
+	}
+	
+}
+
+
+void printt(struct treeNode* root,int max_height){
+    
+    
+    if(root==NULL){
+        return;
+    }
+        
+            if(max_height!=0){
+            
+    
+    
+                if(root->leftptr==NULL){//first check left branches
+                    
+                
+                    
+                    if(root->rightptr==NULL){//check right branches
+                    	return;
+                    }
+                    else{
+                            printt(root->rightptr,max_height-1);
+                //checks the branching of the right branch as the branch only points to the right
+                            
+                        
+                    }
+            
+                    
+            }
+                else{
+                    
+                        printt(root->leftptr,max_height-1);
+                            //recursive functions to traverse all branches
+                        printt(root->rightptr,max_height-1);
+                        //controls the level with max_height each time it lands on a branch
+                        
+                    
+                }
+            }
+            else{
+            printf("%d\t",root->data);
+            //if the node is not branching
+            }
+        
+}
+
+
+int height(struct treeNode* node)
+//https://prepinsta.com/c-program/find-the-height-of-binary-tree/
+{
+    if (node == NULL)
+        return 0;
+    else {
+        /* compute the height of each subtree */
+        int lheight = height(node->leftptr);
+        int rheight = height(node->rightptr);
+ 
+        /* use the larger one */
+        if (lheight > rheight) {
+            return (lheight + 1);
+        }
+        else {
+            return (rheight + 1);
+        }
+        
+    }
+}
+
+
+
+    
+
+
+int main()
+{
+struct treeNode *root = newNode(9);
+root->leftptr = newNode(12);
+root->rightptr = newNode(21);
+root->leftptr->leftptr = newNode(15);
+root->leftptr->rightptr = newNode(8);
+root->rightptr->leftptr = newNode(7);
+root->rightptr->rightptr = newNode(11);
+printf("Level Order traversal of binary tree is \n");
+
+
+reverseLevelOrder(root);
+
+
+return 0;
+}
